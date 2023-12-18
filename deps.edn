@@ -1,0 +1,7 @@
+{:deps {io.github.humbleui/jwm {:mvn/version "0.4.16"}}
+
+ :aliases
+ {:build {:deps {io.github.humbleui/jwm {:mvn/version "0.4.16"} ; using JWM during build time for platform detection
+                 io.github.clojure/tools.build {:mvn/version "0.9.4"}
+                 babashka/process {:mvn/version "0.5.21"}}
+          :ns-default build}}}
