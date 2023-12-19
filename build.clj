@@ -9,12 +9,13 @@
 (def executable-file "target/example")
 
 (def include-resources
-  ; ".*"
   (str (condp = Platform/CURRENT
          Platform/MACOS ".*\\.dylib"
          Platform/WINDOWS ".*\\.dll"
          Platform/X11 ".*\\.so")
-       "|.*\\.version"))
+       "|.*jwm.version"
+       "|.*skija.version"
+       "|.*\\.ttf")) ; default humble theme bundles a ttf font
 
 (def graalvm-home (System/getenv "GRAALVM_HOME"))
 (def native-image-bin (str graalvm-home "/bin/native-image"))
@@ -36,7 +37,8 @@
            :basis basis
            :main
            ; 'example.jwm
-           'example.skija}))
+           ; 'example.skija
+           'example.humble}))
 
 (defn native [_]
   (uber nil)
@@ -44,29 +46,34 @@
    native-image-bin
    "--initialize-at-build-time"
    "-J-Dclojure.compiler.direct-linking=true"
-   ; "--trace-object-instantiation=java.lang.ref.Cleaner"
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.RefCounted$_FinalizerHolder"
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.Managed"
 
    "--initialize-at-run-time=io.github.humbleui.skija.impl.Cleanable"
    "--initialize-at-run-time=io.github.humbleui.skija.impl.RefCnt$_FinalizerHolder"
 
+   "-Dskija.staticLoad=false"
    "--initialize-at-run-time=io.github.humbleui.skija"
 
-   ; "-H:ReflectionConfigurationFiles=reflect-config.json"
-   ; "-H:ConfigurationFileDirectories=native-image-config"
-   "-H:ConfigurationFileDirectories=traced-config"
-   "-H:+JNI"
-   (str "-H:IncludeResources=" include-resources)
-   "-H:+ReportExceptionStackTraces"
+   ; "--trace-object-instantiation=java.lang.ref.Cleaner"
+   ; "--trace-class-initialization=io.github.humbleui.skija.shaper.Shaper"
+   ; "--trace-class-initialization=io.github.humbleui.skija.Font"
+   ; "--trace-class-initialization=io.github.humbleui.skija.Typeface"
 
-   "-Dskija.staticLoad=false"
-   "-Dskija.logLevel=DEBUG"
+   ; "-H:ConfigurationFileDirectories=native-image-config"
+   ; "-H:ConfigurationFileDirectories=traced-config"
+   ; "-H:ReflectionConfigurationFiles=reflect-config.json"
+   "-H:+JNI"
+   "-H:JNIConfigurationFiles=traced-config/jni-config.json"
+   (str "-H:IncludeResources=" include-resources)
 
    "--no-fallback"
+   "-H:+ReportExceptionStackTraces"
    "--report-unsupported-elements-at-runtime"
+
    "--native-image-info"
    "--verbose"
+   "-Dskija.logLevel=DEBUG"
 
    "-jar"
    uber-file

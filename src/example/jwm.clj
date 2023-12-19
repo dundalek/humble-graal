@@ -1,4 +1,5 @@
 ;; Based on https://github.com/HumbleUI/JWM/blob/main/examples/empty/java/Example.java
+;; with Skija rendering removed
 (set! *warn-on-reflection* true)
 (ns example.jwm
   (:gen-class)
