@@ -1,6 +1,6 @@
 ;; Based on https://github.com/HumbleUI/JWM/blob/main/examples/empty/java/Example.java
 (set! *warn-on-reflection* true)
-(ns example.main
+(ns example.jwm
   (:gen-class)
   (:import
    [io.github.humbleui.jwm App EventWindowClose EventWindowCloseRequest]
@@ -21,7 +21,7 @@
                        (instance? EventWindowCloseRequest e)
                        (.close window))))]
     (doto window
-      (.setTitle "Empty JWM")
+      (.setTitle "Empty")
       (.setEventListener listener)
       (.setWindowSize (int (* 300 scale)) (int (* 600 scale)))
       (.setWindowPosition (int (* 300 scale)) (int (* 200 scale)))

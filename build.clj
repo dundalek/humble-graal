@@ -9,10 +9,12 @@
 (def executable-file "target/example")
 
 (def include-resources
-  (condp = Platform/CURRENT
-    Platform/MACOS ".*\\.dylib"
-    Platform/WINDOWS ".*\\.dll"
-    Platform/X11 ".*\\.so"))
+  ; ".*"
+  (str (condp = Platform/CURRENT
+         Platform/MACOS ".*\\.dylib"
+         Platform/WINDOWS ".*\\.dll"
+         Platform/X11 ".*\\.so")
+       "|.*\\.version"))
 
 (def graalvm-home (System/getenv "GRAALVM_HOME"))
 (def native-image-bin (str graalvm-home "/bin/native-image"))
@@ -32,7 +34,9 @@
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :basis basis
-           :main 'example.main}))
+           :main
+           ; 'example.jwm
+           'example.skija}))
 
 (defn native [_]
   (uber nil)
@@ -40,13 +44,30 @@
    native-image-bin
    "--initialize-at-build-time"
    "-J-Dclojure.compiler.direct-linking=true"
+   ; "--trace-object-instantiation=java.lang.ref.Cleaner"
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.RefCounted$_FinalizerHolder"
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.Managed"
+
+   "--initialize-at-run-time=io.github.humbleui.skija.impl.Cleanable"
+   "--initialize-at-run-time=io.github.humbleui.skija.impl.RefCnt$_FinalizerHolder"
+
+   "--initialize-at-run-time=io.github.humbleui.skija"
+
+   ; "-H:ReflectionConfigurationFiles=reflect-config.json"
+   ; "-H:ConfigurationFileDirectories=native-image-config"
+   "-H:ConfigurationFileDirectories=traced-config"
+   "-H:+JNI"
+   (str "-H:IncludeResources=" include-resources)
+   "-H:+ReportExceptionStackTraces"
+
+   "-Dskija.staticLoad=false"
+   "-Dskija.logLevel=DEBUG"
+
    "--no-fallback"
    "--report-unsupported-elements-at-runtime"
-   (str "-H:IncludeResources=" include-resources)
-   "-H:+JNI"
-   "-H:+ReportExceptionStackTraces"
+   "--native-image-info"
+   "--verbose"
+
    "-jar"
    uber-file
    executable-file))
