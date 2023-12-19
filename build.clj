@@ -16,7 +16,7 @@
 (defn ->executable-file [params]
   (str target-path "/" (->main params)))
 
-(def include-resources
+(def resources-pattern
   (str
    ;; uber jar contains native libs for all platforms, let's pickup only those for target platform
    ;; this can be further improved by also picking only those for target architecture like x86_64 and arm64
@@ -55,28 +55,31 @@
   (uber params)
   (shell
    native-image-bin
+   ;; Usual practice to initialize Clojure classes at build time by default
    "--initialize-at-build-time"
    "-J-Dclojure.compiler.direct-linking=true"
 
+   ;; Initialize problematic JWM classes at run time
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.RefCounted$_FinalizerHolder"
    "--initialize-at-run-time=io.github.humbleui.jwm.impl.Managed"
 
+   ;; Skija loads native library statically by default which gives me linker errors when running
+   ;; Therefore passing flag to load libs dynamically and initialize its classes at runtime
+   "-Dskija.staticLoad=false"
    "--initialize-at-run-time=io.github.humbleui.skija.impl.Cleanable"
    "--initialize-at-run-time=io.github.humbleui.skija.impl.RefCnt$_FinalizerHolder"
-
-   "-Dskija.staticLoad=false"
    "--initialize-at-run-time=io.github.humbleui.skija"
 
-   ; "--trace-object-instantiation=java.lang.ref.Cleaner"
-   ; "--trace-class-initialization=io.github.humbleui.skija.shaper.Shaper"
-
-   ; "-H:ConfigurationFileDirectories=traced-config"
-   ; "-H:ReflectionConfigurationFiles=reflect-config.json"
-   "-H:JNIConfigurationFiles=traced-config/jni-config.json"
+   ;; Dealing with native bindings using JNI
    "-H:+JNI"
-   (str "-H:IncludeResources=" include-resources)
+   ;; ConfigurationFileDirectories allows conveniently to specify whole configuration directory which can be pointed to auto tracer agent output. But it seems that the reflect-config causes the compilation to hang in analysis stage.
+   ;; When there is no reflection we only need the jni config, which we can specify using JNIConfigurationFiles and ignore the other configs.
+   ; "-H:ConfigurationFileDirectories=traced-config"
+   ; "-H:ReflectionConfigurationFiles=traced-config/reflect-config.json"
+   "-H:JNIConfigurationFiles=traced-config/jni-config.json"
+   (str "-H:IncludeResources=" resources-pattern)
 
-   ;; Some extra reporting for debugging
+   ;; Some extra reporting for debugging purposes
    "-H:+ReportExceptionStackTraces"
    "--report-unsupported-elements-at-runtime"
    "--native-image-info"
