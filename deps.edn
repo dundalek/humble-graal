@@ -2,9 +2,9 @@
         ; io.github.humbleui/types {:mvn/version "0.2.0"}
         ; io.github.humbleui/skija-linux-x64 {:mvn/version "0.116.2"}
         ; io.github.humbleui/humbleui {:git/sha "9e6088e40e516f267d59ef91aa8606d5025947a1"}}
-                                      ; :local/root "../HumbleUI"
         ;; humble depends on jwm, skija and pulls native dependencies for all platforms and architectures
-        io.github.dundalek/humbleui {:git/sha "93432ffec2a9e412c5994978f32a73a0f7a3ebb8"}}
+        io.github.dundalek/humbleui {:git/sha "192cb4001a248feae4b247220ae7a1709035de90"}}
+                                     ;:local/root "../HumbleUI"}}
 
  :aliases
  {:build {:deps {io.github.humbleui/jwm {:mvn/version "0.4.16"} ; using JWM during build time for platform detection

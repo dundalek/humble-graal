@@ -68,11 +68,17 @@
    "-Dskija.staticLoad=false"
    "--initialize-at-run-time=io.github.humbleui.skija.impl.Cleanable"
    "--initialize-at-run-time=io.github.humbleui.skija.impl.RefCnt$_FinalizerHolder"
+   ;; This a lazy wildcard to initialize Skija classes at run time, then we bring BlendMode back to build time
+   ;; Should probably enumerate run time classes.
+   ;; To avoid being brittle it depends whether there is bigger chance that new native classes are added,
+   ;; or that non-native skija classes are used in build time context (e.g. in def bindings).
    "--initialize-at-run-time=io.github.humbleui.skija"
+   "--initialize-at-build-time=io.github.humbleui.skija.BlendMode"
 
    ;; Dealing with native bindings using JNI
    "-H:+JNI"
-   ;; ConfigurationFileDirectories allows conveniently to specify whole configuration directory which can be pointed to auto tracer agent output. But it seems that the reflect-config causes the compilation to hang in analysis stage.
+   ;; ConfigurationFileDirectories allows conveniently to specify whole configuration directory which can be pointed to auto tracer agent output.
+   ;; But it seems that the reflect-config causes the compilation to hang in analysis stage.
    ;; When there is no reflection we only need the jni config, which we can specify using JNIConfigurationFiles and ignore the other configs.
    ; "-H:ConfigurationFileDirectories=traced-config"
    ; "-H:ReflectionConfigurationFiles=traced-config/reflect-config.json"
