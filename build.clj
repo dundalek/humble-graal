@@ -21,13 +21,13 @@
    ;; uber jar contains native libs for all platforms, let's pickup only those for target platform
    ;; this can be further improved by also picking only those for target architecture like x86_64 and arm64
    (condp = Platform/CURRENT
-     Platform/MACOS ".*\\.dylib"
-     Platform/WINDOWS ".*\\.dll"
-     Platform/X11 ".*\\.so")
-   "|.*jwm.version"
-   "|.*skija.version"
+     Platform/MACOS ".*\\.dylib$"
+     Platform/WINDOWS ".*\\.dll$"
+     Platform/X11 ".*\\.so$")
+   "|.*jwm.version$"
+   "|.*skija.version$"
    ;; default humble theme bundles a ttf font
-   "|.*\\.ttf"))
+   "|.*\\.ttf$"))
 
 (def graalvm-home (System/getenv "GRAALVM_HOME"))
 (def native-image-bin (str graalvm-home "/bin/native-image"))
@@ -91,6 +91,13 @@
    "--native-image-info"
    "--verbose"
    "-Dskija.logLevel=DEBUG"
+
+   ;; Reports for image size optimization
+   ;; target/dashboard-dump.bgv that can be loaded visualized in https://www.graalvm.org/dashboard/
+   "-H:+DashboardAll"
+   "-H:DashboardDump=target/dashboard-dump"
+   ;; target/humble-build-report.html to be opened in browser
+   "-H:+BuildReport"
 
    "--no-fallback"
    "-jar"
