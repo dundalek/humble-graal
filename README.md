@@ -5,8 +5,9 @@ This repo shows how to compile [HumbleUI](https://github.com/HumbleUI/HumbleUI) 
 The build uses only [Clojure CLI](https://clojure.org/guides/deps_and_cli), deps and tools.build.
 No Leiningen or shell scripts needed.
 
-Tested on Linux x86_64 (PopOS 22.04 LTS, Ubuntu-compatible).
-I expect it should work on Mac and Windows too (perhaps with minor tweaks, PRs welcome).
+Tested on
+- Linux x86_64 (PopOS 22.04 LTS, Ubuntu-compatible)
+- macOS M1 (Ventura 13.5)
 
 ## Build
 
